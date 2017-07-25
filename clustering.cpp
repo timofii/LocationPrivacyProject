@@ -4,19 +4,29 @@
 #include <vector>
 #include <math.h>
 #include <unordered_map>
+
 #include <string>
+
 
 #include "qif"
 #include "CONSTANTS.h"
 #include "point.h"
 #include "cluster.h"
 #include "clustering.h"
+
 #include "UF.h"
+
 
 using namespace std;
 
 //remove it from here
 //start
+
+
+//static int lengthOfCluster = 2;
+//static int widthOfCluster = 2;
+
+//const  static int numberOfClusters = 15; //numberOfPoints / (lengthOfCluster * widthOfCluster);
 
 static std::vector<MyPoint> vPoints(NUMBER_OF_POINTS);
 
@@ -32,6 +42,7 @@ static std::unordered_map <int, int> mPointsBelongsToClusters;
 
 
 //T1(k-1) = t1(k)
+
 static std::vector<int> vT1(NUMBER_OF_CLUSTERS + 1);
 
 static int aT2[NUMBER_OF_CLUSTERS][NUMBER_OF_CLUSTERS];
@@ -39,18 +50,23 @@ static int aT2[NUMBER_OF_CLUSTERS][NUMBER_OF_CLUSTERS];
 
 typedef qif::lp::MatrixEntry<double> ME;
 
+
 static list<ME> entries; 
 
 static double Pi[NUMBER_OF_POINTS];
 
+
 static qif::lp::LinearProgram<double> lp;
+
 
 
 void initSetOfLocations()
 {	/*
 	 Initialize Points of the big Grid of locations 
 	 */
+
 	//cout << "Start Initialization of Lotations." << endl;
+
 	int sizeOfBigGrid = sqrt(NUMBER_OF_POINTS);
 
 	for(int i = 0; i < sizeOfBigGrid; ++i)
@@ -62,6 +78,7 @@ void initSetOfLocations()
 			
 		}
 	}
+
 	//cout << "Finish Initialization of Lotations!" << endl;
 }
 
@@ -72,6 +89,7 @@ int getNumberOfPointInVectorOfPoints(MyPoint p)
 	 */
 	int sizeOfBigGrid = sqrt(NUMBER_OF_POINTS);
 	return (sizeOfBigGrid * p.getX()) + p.getY();
+
 }
 
 void displaySetOfLocations()
@@ -88,7 +106,9 @@ std::vector<Cluster> naiveClustering()//(int lengthOfCluster, int widthOfCluster
 	 Clustered the Grid by pices which are paralelepipeds.
 	 Does not exist check for a size of clusters, therefore carefully choosing parameters of a function to avare an error!!!
 	 */
+
 	//cout << "Start Naive Clustering." << endl;
+
 	//int numberOfClusters = NUMBER_OF_POINTS / (lengthOfCluster * widthOfCluster);
 	std::vector<Cluster> vClusters(NUMBER_OF_CLUSTERS);
 
@@ -108,6 +128,7 @@ std::vector<Cluster> naiveClustering()//(int lengthOfCluster, int widthOfCluster
 		//   	value-> #cluster
 		mPointsBelongsToClusters[ i ] = (coeficientOfLinearization * x) + y;
 	}
+
 	//cout << "End Naive Clustering!" << endl;
 	return vClusters;
 }
@@ -153,6 +174,7 @@ std::vector<Cluster> PreClustering()
 //	cout << "pClusters->count " << pClusters->count() << endl;
 
 	std::vector<Cluster> vClusters(NUMBER_OF_CLUSTERS);
+
 	return vClusters;
 }
 
@@ -175,7 +197,9 @@ void initDistanceMatrix()
 	Calculate distance between all points and fill the Distance Matrix
 	 */
 
+
 	//cout << "Start Initialization of Distance Matrix Between Points." << endl;
+
 	for (int i = 0; i < NUMBER_OF_POINTS; ++i)
 	{
 		for (int j = 0; j < NUMBER_OF_POINTS; ++j)
@@ -183,7 +207,9 @@ void initDistanceMatrix()
 			distanceMatrix[ i ][ j ] = distance(vPoints[ i ], vPoints[ j ]);
 		}
 	}
+
 	//cout << "Finish Initialization of Distance Matrix Between Points!" << endl;
+
 }
 
 void displayDistanceMatrix()
@@ -203,6 +229,7 @@ void initDistanceMatrixForClusters( std::vector<Cluster> vClusters)
 {	/*
 	Calculate distance between all clusters and fill the Distance Matrix for clusters
 	 */
+
 	double min = DBL_MAX;
 	
 	for (int k = 0; k < vClusters.size(); ++k)
@@ -210,6 +237,7 @@ void initDistanceMatrixForClusters( std::vector<Cluster> vClusters)
 		for (int p = 0; p < vClusters.size(); ++p)
 		{
 			min = DBL_MAX; 
+
 			for (int i = 0; i < vClusters[ k ].size() ; ++i)
 			{
 				for (int j = 0; j < vClusters[ p ].size(); ++j)
@@ -220,11 +248,13 @@ void initDistanceMatrixForClusters( std::vector<Cluster> vClusters)
 						min = distance(vClusters[ k ].getPoint(i), vClusters[ p ].getPoint(j));
 					}
 					//cout << "i " << i <<" j "<< j << min;
+
 				}				
 			}
 			
 			distanceMatrixForClusters[ k ][ p ] = min;	
 		}
+
 	}
 	
 }
@@ -246,12 +276,15 @@ void initNeighbourMatrixOfClusters(double distanceThreshold)
 {	/*
 	Fill the Neighbour Matrix using as the parameter the distance Threshhold.
 	 */
+
 	// initDistanceMatrixForClusters( std::vector<Cluster> vClusters);
+
 	for (int i = 0; i < NUMBER_OF_CLUSTERS; ++i)
 	{
 		for (int j = 0; j < NUMBER_OF_CLUSTERS; ++j)
 		{
 			if( distanceMatrixForClusters[ i ][ j ] <= distanceThreshold)
+
 				{
 					neighbourMatrixOfClusters[ i ][ j ] = true;
 				}
@@ -259,6 +292,7 @@ void initNeighbourMatrixOfClusters(double distanceThreshold)
 				{
 					neighbourMatrixOfClusters[ i ][ j ] = false;
 				}
+
 		}
 	}
 }
@@ -319,6 +353,7 @@ void displayMapPointsBelongsToClusters()
 /////////////////////////////////////////////////////////////
 ////////// Ostorojno poshel govno kod!!!!
 
+
 // new function from 0 to K
 void initT1(std::vector<Cluster> vClusters)
 {
@@ -348,6 +383,7 @@ int numberOfVariables(std::vector<Cluster> vClusters)
 	return NUMBER_OF_POINTS_2 + (2 * vT1[ NUMBER_OF_CLUSTERS ]) + (2 * NUMBER_OF_CLUSTERS * NUMBER_OF_POINTS); 
 
 }
+
 
 void initT2(std::vector<Cluster> vClusters)
 {
@@ -392,6 +428,7 @@ void displayT2()
 
 int indexOfPointInCluster(int index, std::vector<Cluster> vClusters)
 {
+
 	/*
 	REWRITE using unordered map with custom class
 	*/
@@ -401,6 +438,7 @@ int indexOfPointInCluster(int index, std::vector<Cluster> vClusters)
 	int y0 = vPoints[index].getY();
 
 	//cout << "index " << index << "index "<<vPoints.size()<< endl;	
+
 	int indexOfCluster = mPointsBelongsToClusters[ index ];
 	//cout << "--"<<indexOfCluster << "--" <<endl;
 	int x1 = 0;
@@ -428,6 +466,7 @@ int l1(int i, int k1, std::vector<Cluster> vClusters)
 {
 	if(i == NUMBER_OF_POINTS)
 		cout<< "ERROR: problem with parameter i in function l1()" << endl;
+
 	/*
 	Be careful aT2 is NOT symetric!!!!
 	Right order is k == k0, k' == k1
@@ -469,7 +508,9 @@ int initTrivialConstraints(std::vector<Cluster> vClusters)
 	/*
 	Check this function !!!
 	*/
+
 	//cout << "Init Trivial Constraints! " << endl;
+
 	int amountOfVariables = numberOfVariables(vClusters);
 
 	for (int x = 0; x < NUMBER_OF_POINTS; ++x)
@@ -486,19 +527,22 @@ int initTrivialConstraints(std::vector<Cluster> vClusters)
 			}
 		}
 	}
-	
+
 	return NUMBER_OF_POINTS;
 }
 
 
  int initFirstConstraints(std::vector<Cluster> vClusters)
  {
+
  	//cout << "Init 1th Constraints! " << endl;
  	int i = 0, j = 0, k0 = 0, k1 = 0;
+
  	for (int x = NUMBER_OF_POINTS; x < NUMBER_OF_POINTS + NUMBER_OF_POINTS_2; ++x)
  	{
  		i = ((x - NUMBER_OF_POINTS)/ NUMBER_OF_POINTS) + 1;
  		j = x - (i * NUMBER_OF_POINTS);
+
  		
  		k0 = mPointsBelongsToClusters[ i - 1 ];
  		k1 = mPointsBelongsToClusters[ j ];
@@ -515,19 +559,23 @@ int initTrivialConstraints(std::vector<Cluster> vClusters)
  		}
  		//if( (x - NUMBER_OF_POINTS) == l1(i - 1, k1, vClusters))
  		//	{cout<< "----------HHHH--------------" << endl;}
+
  	}
  	return NUMBER_OF_POINTS + NUMBER_OF_POINTS_2;
  }
 
  int initSecondConstraints(std::vector<Cluster> vClusters)
  {
+
  	//cout << "Init 2nd Constraints! " << endl;
  	int i = 0, j = 0, k0 = 0, k1 = 0;
+
  	for (int x = NUMBER_OF_POINTS + NUMBER_OF_POINTS_2; x < NUMBER_OF_POINTS + (2 * NUMBER_OF_POINTS_2) ; ++x)
  	{
 
  		i = ((x - NUMBER_OF_POINTS_2 - NUMBER_OF_POINTS) / NUMBER_OF_POINTS) + 1;
  		j = x - (i * NUMBER_OF_POINTS) - NUMBER_OF_POINTS_2;
+
 
  		k0 = mPointsBelongsToClusters[ i - 1 ];
  		k1 = mPointsBelongsToClusters[ j ];
@@ -545,18 +593,22 @@ int initTrivialConstraints(std::vector<Cluster> vClusters)
  	//	 if( (x - NUMBER_OF_POINTS_2 - NUMBER_OF_POINTS) == l2(i - 1, k1, vClusters))
  	//		{cout<< "----------AAA--------------" << endl;}
  	
+
  	}
  	return NUMBER_OF_POINTS + (2 * NUMBER_OF_POINTS_2);
  }
 
 int initThirdConstraints(std::vector<Cluster> vClusters)
 {
+
 	//cout << "Init 3rd Constraints! " << endl;
+
 	int i = 0, j = 0, k1 = 0;
 	for (int x = NUMBER_OF_POINTS + (2 * NUMBER_OF_POINTS_2); x <  NUMBER_OF_POINTS + (3 * NUMBER_OF_POINTS_2); ++x)
  	{
  		i = ((x - (2 * NUMBER_OF_POINTS_2) - NUMBER_OF_POINTS) / NUMBER_OF_POINTS) + 1;
  		j = x - (i * NUMBER_OF_POINTS) - (2 * NUMBER_OF_POINTS_2);
+
 
  		entries.push_back( ME(x, x - (2 * NUMBER_OF_POINTS_2) - NUMBER_OF_POINTS, -1) );
  		
@@ -565,20 +617,22 @@ int initThirdConstraints(std::vector<Cluster> vClusters)
 
  		//if( (x - (2 * NUMBER_OF_POINTS_2) - NUMBER_OF_POINTS) == l3(j, k1, vClusters))
  		//	{cout<< "----------ZZZ--------------" << endl;}
+
  	}
  	return NUMBER_OF_POINTS + (3 * NUMBER_OF_POINTS_2);
 }
 
 int initFourthConstraints(std::vector<Cluster> vClusters)
 {
+
 	//cout << "Init 4th Constraints! " << endl;
+
 	int i = 0, j = 0, k1 = 0;
 
 	for (int x = NUMBER_OF_POINTS + (3 * NUMBER_OF_POINTS_2); x <  NUMBER_OF_POINTS + (4 * NUMBER_OF_POINTS_2); ++x)
  	{
  		i = ((x - (3 * NUMBER_OF_POINTS_2) - NUMBER_OF_POINTS) / NUMBER_OF_POINTS) + 1;
  		j = x - (3 * NUMBER_OF_POINTS_2) - (i * NUMBER_OF_POINTS);
- 		
 
  		entries.push_back( ME(x, x - (3 * NUMBER_OF_POINTS_2) - NUMBER_OF_POINTS, 1) );
 
@@ -596,11 +650,13 @@ int initFourthConstraints(std::vector<Cluster> vClusters)
 //Run and Debug this shit!!!!!!!!!  
 int initPrivacyConstraints(std::vector<Cluster> vClusters)
 {
+
 	//cout << "Init Privacy Constraints! " << endl;
 	int x0 = 0,
 		x1 = 0,
 		y = 0;
 	int amount_of_constraints = NUMBER_OF_POINTS + (4 * NUMBER_OF_POINTS_2);
+
 	for (int k0 = 0; k0 < NUMBER_OF_CLUSTERS; ++k0)
 	{
 		for (int k1 = 0; k1 < NUMBER_OF_CLUSTERS; ++k1)
@@ -612,12 +668,14 @@ int initPrivacyConstraints(std::vector<Cluster> vClusters)
 					(neighbourMatrixOfClusters[ k0 ][ k2 ] || neighbourMatrixOfClusters[ k1 ][ k2 ]))
 				{
 
+
 					for (int i0 = 0; i0 < vClusters[ k0 ].size(); ++i0)
 					{
 						for (int i1 = 0; i1 < vClusters[ k1 ].size(); ++i1)
 						{
 							for (int j = 0; j < vClusters[ k2 ].size(); ++j)
 							{
+
 								amount_of_constraints++;
 
 									x0 = getNumberOfPointInVectorOfPoints(vClusters[ k0 ].getPoint(i0));
@@ -628,25 +686,31 @@ int initPrivacyConstraints(std::vector<Cluster> vClusters)
 								{
 									entries.push_back( ME(amount_of_constraints, l0(x0, y), 1) );
 									entries.push_back( ME(amount_of_constraints, l0(x1, y), -exp(distanceMatrix[x0][x1]) ) );
+
 								}
 								//Problems HERE!!!!!!!
 								//if( l0(i0, j) == l0(i1, j))
  								//	{cout<< "------------$$$$$$$------------" << endl;}
+
 								//cout << "ttt:" << x0 << " " << y << " = " << l0(x1, y) << endl;
 								//cout << "ppp:" << l0(x1, y) << endl;
+
 
 							}
 						}
 					}
 				}
+
 				else if(neighbourMatrixOfClusters[ k0 ][ k1 ] && 
 				   (! neighbourMatrixOfClusters[k0][k2]) && (! neighbourMatrixOfClusters[k1][k2]))
 				{
+
 
 					for (int i0 = 0; i0 < vClusters[ k0 ].size(); ++i0)
 					{
 						for (int i1 = 0; i1 < vClusters[ k1 ].size(); ++i1)
 						{
+
 							amount_of_constraints++;
 							x0 = getNumberOfPointInVectorOfPoints(vClusters[ k0 ].getPoint(i0));
 							x1 = getNumberOfPointInVectorOfPoints(vClusters[ k1 ].getPoint(i1));
@@ -656,12 +720,14 @@ int initPrivacyConstraints(std::vector<Cluster> vClusters)
 
 							if( l2(i0, k2, vClusters) == l1(i1, k2, vClusters))
  							{cout<< "++++----++++++++---++++++" << endl;}
+
 							
 						}
 					}
 				}
 				else
 				{
+
 
 					for (int j = 0; j < vClusters[ k2 ].size(); ++j)
 					{
@@ -674,11 +740,13 @@ int initPrivacyConstraints(std::vector<Cluster> vClusters)
 						if( l4(j, k0, vClusters) == l3(j, k1, vClusters))
  							{cout<< "/////////////*****////////////" << endl;}
 
+
 					}
 				}
 			}
 		}
 	}
+
 	cout << " CONSTRAINTS: " << amount_of_constraints << endl;
 	// Return the amount of constraints == b_size == sense_size
 	return amount_of_constraints;
@@ -708,6 +776,7 @@ void fillVector_B_and_Sence(int numberOfConstraints)
 	/* 
 	Before run initParametersOfLP(int c_size, int b_size, int sense_size)!!!
 	*/
+
 	//cout << "Fill vector B and SENCE in LP! " << endl;
 	for (int i = 0; i < numberOfConstraints; ++i)
 	{
@@ -728,10 +797,12 @@ void fillVector_B_and_Sence(int numberOfConstraints)
 void initPriors()
 {
 	//cout << "Init Priors!" << endl;
+
     for(int i = 0; i< NUMBER_OF_POINTS; i++)
     {
     	Pi[i] = 1.0 / NUMBER_OF_POINTS;
     }
+
     cout << endl;
 }
 
@@ -749,6 +820,7 @@ void fillVector_C()
 {
 	//cout << "Fill vector C in LP! " << endl;
 
+
 	for (int i = 0; i < NUMBER_OF_POINTS; ++i)
 	{
 		for (int j = 0; j < NUMBER_OF_POINTS; ++j)
@@ -757,6 +829,7 @@ void fillVector_C()
 		}
 	}	
 	/*
+
 	for (int i = NUMBER_OF_POINTS_2; i < numberOfVariables; ++i)
 	{
 		lp.c(i) = 0;
@@ -833,6 +906,7 @@ void showInfo()
 	
 }
 
+
 /*
 // In case that vector B and Sence will be calculated separately!
 void fillVectorB(int b_size, int numberOfTrivialConstraints)
@@ -860,7 +934,9 @@ void fillSence(int sence_size, int numberOfTrivialConstraints)
 }
 */
 //brut0303 Brut0303 brut_0303 Brut_0303
+
 //R,eE)g>M
+
 
 
 

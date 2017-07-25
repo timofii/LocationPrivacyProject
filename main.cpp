@@ -7,16 +7,20 @@
 #include "point.h"
 #include "cluster.h"
 #include "clustering.h"
+
 #include "UF.h"
+
 
 using namespace qif;
 
 using namespace std;
 
+
 typedef qif::lp::MatrixEntry<double> ME;
 
 static list<ME> entries; 
 static qif::lp::LinearProgram<double> lp;
+
 
 /*template <int N>
 class templateclass {
@@ -29,6 +33,7 @@ public:
 
 int main(int argc, char const *argv[])
 {
+
 
 /*
 templateclass<5788> a;

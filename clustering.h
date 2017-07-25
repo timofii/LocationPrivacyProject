@@ -2,10 +2,12 @@
 #define ADD_CLUSTERINGH
 
 void initSetOfLocations();
+
 int getNumberOfPointInVectorOfPoints(MyPoint p);
 void displaySetOfLocations();
 std::vector<Cluster> naiveClustering();//(int lengthOfCluster, int widthOfCluster);
 std::vector<Cluster> PreClustering();
+
 
 
 //precomputations.cpp
@@ -51,6 +53,7 @@ int initThirdConstraints(std::vector<Cluster> vClusters);
 int initFourthConstraints(std::vector<Cluster> vClusters);
 
 int initPrivacyConstraints(std::vector<Cluster> vClusters);
+
 int InitConstraints(std::vector<Cluster> vClusters);
 
 void initParametersOfLP(int numberOfVariables, int numberOfConstraints);
@@ -66,4 +69,5 @@ vector<Cluster> InitBasic(double distanceThresholdForNeighbourClusters);
 void fill_Objects_Of_LP(int numberOfConstraints);
 double solve(string extremum, string method);
 void showInfo();
+
 #endif
