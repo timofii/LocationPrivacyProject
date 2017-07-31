@@ -828,13 +828,13 @@ void fillVector_C()
 			lp.c(l0(i, j)) = (Pi[ i ] * distanceMatrix[ i ][ j ]);
 		}
 	}	
-	/*
+	
 
-	for (int i = NUMBER_OF_POINTS_2; i < numberOfVariables; ++i)
-	{
-		lp.c(i) = 0;
-	}
-	*/
+	//for (int i = NUMBER_OF_POINTS_2; i < lp.c.size(); ++i)
+	//{
+	//	lp.c(i) = 0;
+	//}
+	
 }
 
 void fill_Objects_Of_LP(int numberOfConstraints)
@@ -866,6 +866,10 @@ double solve(string extremum, string method)
 {
 	cout << " Method: " << method << endl;
 	cout << " ::::::::: " << extremum << " ::::::::" << endl; 
+	
+	lp.glp_msg_level = qif::lp::msg_level_t::all;
+    lp.glp_presolve = true;
+
 	if(extremum == "max")	
 	{
 		lp.maximize = true;
@@ -895,6 +899,34 @@ double solve(string extremum, string method)
 }
 void showInfo()
 {
+	qif::chan opt(NUMBER_OF_POINTS,NUMBER_OF_POINTS);
+
+    for(int i = 0; i < NUMBER_OF_POINTS; ++i){
+        for(int j = 0; j < NUMBER_OF_POINTS; ++j){
+            opt(i,j) = lp.x.at( i * NUMBER_OF_POINTS + j);
+        }
+    }
+
+    uint width = std::sqrt(NUMBER_OF_POINTS);
+    
+    auto d_euclid = qif::metric::grid<double>(width);
+    auto d_priv = 1.0 * d_euclid;
+    auto d_loss = d_euclid;
+    double threshold = 1e200;
+    
+    qif::prob pi = qif::probab::uniform<double>(NUMBER_OF_POINTS);
+    
+   
+    
+    //std::cout << "size: " << opt.n_elem << "\n";
+    //std::cout << "Pr(0 | 0) = " << opt.at(0, 0) << "\n";
+    
+            //////////////
+    std::cout << "utility(from channel): " << qif::utility::expected_distance(d_loss, pi, opt) << "\n";
+    cout << "actual epsilon: " << qif::mechanism::smallest_epsilon(opt, d_priv) << "\n";
+    cout << "is proper: " << qif::channel::is_proper(opt) << "\n";
+    
+
  	cout <<" A.n_rows: "<< lp.A.n_rows << endl;
     cout <<" b.n_elem: "<< lp.b.n_elem << endl;
     cout <<" sense.n_elem: "<< lp.sense.n_elem << endl;
@@ -902,7 +934,8 @@ void showInfo()
     cout <<" c.n_elem: "<< lp.c.n_elem << endl;
     cout <<" Status: "<< lp.status << endl;
     cout <<" lp.x.n_elem: "<< lp.x.n_elem <<endl;
-    cout << " Optimum: "<< lp.optimum() << endl;
+    cout << " Optimum(c,x): "<< lp.optimum() << endl;
+
 	
 }
 

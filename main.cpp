@@ -53,7 +53,7 @@ a.blabla();
 
 
 	cout << "---------------+++++++++++++-----------++++++++++++++----------------" << endl;
-	double neighbourThreshold = 100.9;
+	double neighbourThreshold = 1.5;
 	vector<Cluster> vClusters = InitBasic(neighbourThreshold);
 
 	vector<Cluster> V = PreClustering();
